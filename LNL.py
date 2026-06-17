@@ -66,7 +66,7 @@ class Block(nn.Module):
             attn_drop=attn_drop, proj_drop=drop)
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
 
-        self.conv = LocalityFeedForward(dim, dim, 1, mlp_ratio, reduction=dim)
+        self.conv = LocalityFeedForward(dim, dim, 1, mlp_ratio, reduction=4)
 
 
     def forward(self, pixel_embed, patch_embed):
