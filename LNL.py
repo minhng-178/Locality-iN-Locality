@@ -134,4 +134,15 @@ def LNL_S(pretrained=False, **kwargs):
     if pretrained:
         load_pretrained(
             model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
-    return 
+    return model
+
+
+@register_model
+def LNL_B(pretrained=False, **kwargs):
+    model = LocalViT_TNT(patch_size=16, embed_dim=768, in_dim=48, depth=12, num_heads=12, in_num_head=4,
+                         qkv_bias=False, **kwargs)
+    model.default_cfg = default_cfgs['tnt_b_conv_patch16_224']
+    if pretrained:
+        load_pretrained(
+            model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
+    return model
