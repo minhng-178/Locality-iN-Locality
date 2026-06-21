@@ -22,7 +22,11 @@ The repo introduces **LNL (Locality iN Locality)** — Vision Transformers that 
 .
 ├── LNL.py                  # Top-level model: LNL_Ti, LNL_S (locality + TNT)
 ├── LNL_MoEx.py             # Top-level model: LNL_MoEx_Ti, LNL_MoEx_S (locality + TNT + MoEx)
-├── Instructions.ipynb      # Full training/eval procedure (data prep, commands, expected output)
+├── Instructions.ipynb      # Original training/eval procedure (data prep, commands, expected output)
+├── Instructions-best.ipynb # Optimized training/eval procedure with checkpoints, caching and evaluation
+├── LNL_Ti_GTSRB_best.pt    # Best trained LNL_Ti model checkpoint
+├── model_checkpoint_epoch_5.pt # Trained LNL model checkpoint at epoch 5
+├── model_checkpoint_LNL_MoEx_final_epoch_5.pt # Trained LNL_MoEx model checkpoint at epoch 5
 ├── README.md               # Paper info and citation
 └── models/
     ├── __init__.py         # Imports all model modules so @register_model fires
@@ -86,7 +90,7 @@ Registered functions: `LNL_Ti`, `LNL_S`, `LNL_MoEx_Ti`, `LNL_MoEx_S`, plus `tnt_
 
 ## Training & Evaluation
 
-Full procedure lives in `Instructions.ipynb` (open in Colab via the badge in `README.md`). Key points:
+- Full procedure lives in [Instructions-best.ipynb](file:///d:/Locality-iN-Locality/Instructions-best.ipynb) (optimized training and model checkpoint loading) or [Instructions.ipynb](file:///d:/Locality-iN-Locality/Instructions.ipynb) (original). Key points:
 
 - Standard timm-style training: AdamW + cosine LR + warmup, RandAugment, Mixup (α=0.8), CutMix (α=1.0), label smoothing 0.1.
 - ImageNet directory structure: `train/<class>/*.jpg` and `val/<class>/*.jpg`.

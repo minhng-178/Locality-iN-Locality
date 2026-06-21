@@ -3,7 +3,15 @@
 This repo is the official implementation of ["Locality iN Locality"](https://arxiv.org/abs/2301.11553).
 
 ## Train & Test --- Prepare data
-Please go to ["Instructions.ipynb"](https://github.com/Omid-Nejati/Locality-iN-Locality/blob/main/Instructions.ipynb) for complete detail on dataset preparation and Train/Test procedure or follow the instructions below. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1-phpyKQSLdmwISrkVqprtXgEBMP3fFNz?usp=sharing)
+Please refer to the updated notebook [Instructions-best.ipynb](file:///d:/Locality-iN-Locality/Instructions-best.ipynb) for complete details on dataset preparation, optimized training, evaluation, and adversarial attacks (FGSM/PGD). The original notebook is also available at [Instructions.ipynb](file:///d:/Locality-iN-Locality/Instructions.ipynb).
+
+## Trained Model Checkpoints
+The repository includes the following trained model checkpoints on the GTSRB dataset:
+- **`LNL_Ti_GTSRB_best.pt`**: The best performing LNL-Ti model checkpoint on GTSRB.
+- **`model_checkpoint_epoch_5.pt`**: Standard LNL model checkpoint at epoch 5.
+- **`model_checkpoint_LNL_MoEx_final_epoch_5.pt`**: LNL-MoEx model checkpoint at epoch 5.
+
+For loading and evaluating these checkpoints, please refer to the evaluation cells in [Instructions-best.ipynb](file:///d:/Locality-iN-Locality/Instructions-best.ipynb).
 
 ## Citation
 If you find this project useful in your research, please consider cite:
