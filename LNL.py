@@ -14,7 +14,6 @@ from timm.models.registry import register_model
 from models.localvit import LocalityFeedForward
 from models.tnt import Attention, TNT
 import math
-import os
 
 
 def _cfg(url='', **kwargs):
@@ -67,28 +66,24 @@ class Block(nn.Module):
             attn_drop=attn_drop, proj_drop=drop)
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
 
-        self.conv = LocalityFeedForward(dim, dim, 1, mlp_ratio, reduction=4)
-
-        self.ls_in     = nn.Parameter(torch.ones(in_dim) * 1e-5)
-        self.ls_mlp_in = nn.Parameter(torch.ones(in_dim) * 1e-5)
-        self.ls_out    = nn.Parameter(torch.ones(dim) * 1e-5)
+        self.conv = LocalityFeedForward(dim, dim, 1, mlp_ratio, reduction=dim)
 
 
     def forward(self, pixel_embed, patch_embed):
         # inner
         x, _ = self.attn_in(self.norm_in(pixel_embed))
-        pixel_embed = pixel_embed + self.drop_path(x) * self.ls_in
-        pixel_embed = pixel_embed + self.drop_path(self.mlp_in(self.norm_mlp_in(pixel_embed))) * self.ls_mlp_in
+        pixel_embed = pixel_embed + self.drop_path(x)
+        pixel_embed = pixel_embed + self.drop_path(self.mlp_in(self.norm_mlp_in(pixel_embed)))
 
         # outer
         B, N, C = patch_embed.size()
         Nsqrt = int(math.sqrt(N))
         patch_embed[:, 1:] = patch_embed[:, 1:] + self.proj(self.norm1_proj(pixel_embed).reshape(B, N - 1, -1))
         x, weights = self.attn_out(self.norm_out(patch_embed))
-        patch_embed = patch_embed + self.drop_path(x) * self.ls_out
+        patch_embed = patch_embed + self.drop_path(x)
 
         cls_token, patch_embed = torch.split(patch_embed, [1, N - 1], dim=1)                 # (B, 1, dim), (B, 196, dim)
-        patch_embed = patch_embed.transpose(1, 2).reshape(B, C, Nsqrt, Nsqrt)   # (B, dim, 14, 14)
+        patch_embed = patch_embed.transpose(1, 2).view(B, C, Nsqrt, Nsqrt)   # (B, dim, 14, 14)
         patch_embed = self.conv(patch_embed).flatten(2).transpose(1, 2)                                 # (B, 196, dim)
         patch_embed = torch.cat([cls_token, patch_embed], dim=1)
 
@@ -117,14 +112,7 @@ class LocalViT_TNT(TNT):
                 drop_path=dpr[i], norm_layer=norm_layer))
         self.blocks = nn.ModuleList(blocks)
 
-        self.register_buffer('input_mean', torch.tensor([0.3337, 0.3064, 0.3171]).view(1, 3, 1, 1))
-        self.register_buffer('input_std',  torch.tensor([0.2672, 0.2564, 0.2629]).view(1, 3, 1, 1))
-
         self.apply(self._init_weights)
-
-    def forward_features(self, x):
-        x = (x - self.input_mean) / self.input_std
-        return super().forward_features(x)
 
 
 @register_model
@@ -132,15 +120,6 @@ def LNL_Ti(pretrained=False, **kwargs):
     model = LocalViT_TNT(patch_size=16, embed_dim=192, in_dim=12, depth=12, num_heads=3, in_num_head=3,
                          qkv_bias=False, **kwargs)
     model.default_cfg = default_cfgs['tnt_t_conv_patch16_224']
-
-    ckpt_path = 'LNL_Ti_GTSRB_best.pt'
-    if os.path.exists(ckpt_path):
-        ckpt = torch.load(ckpt_path, map_location='cpu', weights_only=False)
-        if 'model_state_dict' in ckpt:
-            ckpt = ckpt['model_state_dict']
-        ckpt = {k: v for k, v in ckpt.items() if not k.startswith('head.')}
-        model.load_state_dict(ckpt, strict=False)
-
     if pretrained:
         load_pretrained(
             model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
@@ -155,15 +134,4 @@ def LNL_S(pretrained=False, **kwargs):
     if pretrained:
         load_pretrained(
             model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
-    return model
-
-
-@register_model
-def LNL_B(pretrained=False, **kwargs):
-    model = LocalViT_TNT(patch_size=16, embed_dim=768, in_dim=48, depth=12, num_heads=12, in_num_head=4,
-                         qkv_bias=False, **kwargs)
-    model.default_cfg = default_cfgs['tnt_b_conv_patch16_224']
-    if pretrained:
-        load_pretrained(
-            model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
-    return model
+    return 
