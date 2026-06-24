@@ -159,7 +159,7 @@ def LNL_Ti(pretrained=False, **kwargs):
                          qkv_bias=False, **kwargs)
     model.default_cfg = default_cfgs['tnt_t_conv_patch16_224']
 
-    ckpt_path = 'pretrained-model.pt'
+    ckpt_path = 'pretrained_model.pt'
     if os.path.exists(ckpt_path):
         ckpt = torch.load(ckpt_path, map_location='cpu', weights_only=False)
         if 'model_state_dict' in ckpt:
